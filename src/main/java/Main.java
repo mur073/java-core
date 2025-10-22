@@ -43,13 +43,20 @@ public class Main {
                         break;
                     case 5:
                         System.out.print("Enter plane number: ");
+                        int payPlaneNum = scanner.nextInt();
+                        System.out.print("Enter seat number: ");
+                        int paySeatNum = scanner.nextInt();
+                        planeManager.payForSeat(payPlaneNum, paySeatNum);
+                        break;
+                    case 6:
+                        System.out.print("Enter plane number: ");
                         int detailPlaneNum = scanner.nextInt();
                         System.out.print("Enter seat number: ");
                         int detailSeatNum = scanner.nextInt();
                         planeManager.printBookingDetails(detailPlaneNum, detailSeatNum);
                         break;
-                    case 6:
-                        System.out.println("Exitting...");
+                    case 7:
+                        System.out.println("Exiting...");
                         scanner.close();
                         return;
                     default:
@@ -71,7 +78,8 @@ public class Main {
         System.out.println("2. View plane details");
         System.out.println("3. Book a seat");
         System.out.println("4. Cancel booking");
-        System.out.println("5. View booking details");
-        System.out.println("6. Exit");
+        System.out.println("5. Pay for booking");
+        System.out.println("6. View booking details");
+        System.out.println("7. Exit");
     }
 }

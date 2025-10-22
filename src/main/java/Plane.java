@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -5,6 +6,7 @@ public class Plane {
     private final String model;
     private final Integer yearOfManufacture;
     private final Map<Integer, Seat> seats;
+    private LocalDateTime departureTime;
 
     public Plane(String model, Integer yearOfManufacture, Map<Integer, Seat> seats) {
         this.model = model;
@@ -22,6 +24,10 @@ public class Plane {
 
     public Integer getNumberOfSeats() {
         return seats.size();
+    }
+
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
     }
 
     public Map<Integer, Seat> getSeats() {
@@ -48,47 +54,86 @@ public class Plane {
         }
     }
 
+    public void setDepartureTime(LocalDateTime departureTime) {
+        this.departureTime = departureTime;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "model: '%s', year of manufacture: %d, number of seats: %d",
+                "model: '%s', year of manufacture: %d, number of seats: %d, departure time: %s",
                 model,
                 yearOfManufacture,
-                seats.size()
+                seats.size(),
+                departureTime
         );
     }
 
     public static class Seat {
         private final String seatClass;
-        private Boolean isBooked;
+        private SeatStatusEnum status;
 
         public Seat(String seatClass) {
             this.seatClass = seatClass;
-            this.isBooked = false;
+            this.status = SeatStatusEnum.AVAILABLE;
         }
 
         public String getSeatClass() {
             return seatClass;
         }
 
-        public Boolean getBooked() {
-            return isBooked;
+        public Boolean isPaid() {
+            return status.equals(SeatStatusEnum.PAID);
+        }
+
+        public Boolean isBooked() {
+            return status.equals(SeatStatusEnum.BOOKED);
+        }
+
+        public Boolean isAvailable() {
+            return status.equals(SeatStatusEnum.AVAILABLE);
         }
 
         public void book() throws Exception {
-            if (isBooked) {
+            if (isBooked()) {
                 throw new Exception("Already booked");
             }
-            isBooked = true;
+            status = SeatStatusEnum.BOOKED;
+        }
+
+        public void pay() throws Exception {
+            if (isPaid()) {
+                throw new Exception("Already paid");
+            }
+            if (!isBooked()) {
+                throw new Exception("Not available for payment, book first");
+            }
+
+            status = SeatStatusEnum.PAID;
         }
 
         public void cancelBooking() {
-            isBooked = false;
+            status = SeatStatusEnum.AVAILABLE;
         }
 
         @Override
         public String toString() {
-            return String.format("class: '%s', status: '%s'", seatClass, isBooked ? "booked" : "available");
+            return String.format("class: '%s', status: '%s'", seatClass, status.toString());
+        }
+    }
+
+    public enum SeatStatusEnum {
+        AVAILABLE("available"), BOOKED("booked"), PAID("paid");
+
+        final private String text;
+
+        SeatStatusEnum(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
         }
     }
 }

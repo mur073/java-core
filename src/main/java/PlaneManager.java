@@ -1,6 +1,7 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -44,6 +45,25 @@ public class PlaneManager {
         }
     }
 
+    public void payForSeat(int planeNumber, int seatNumber) {
+        try {
+            String bookingId = getBookingId(planeNumber, seatNumber);
+            Booking booking = bookings.get(bookingId);
+
+            if (booking == null) {
+                System.out.println("Booking not found");
+            }
+
+            Plane plane = planes.get(planeNumber);
+            Plane.Seat seat = plane.getSeatByNumber(seatNumber);
+            seat.pay();
+
+            System.out.println("Booking " + seatNumber + " in plane " + planeNumber + " is paid successfully");
+        } catch (Exception e) {
+            System.out.println("Couldn't book a seat: " + e.getMessage());
+        }
+    }
+
     private String getBookingId(int planeNumber, int seatNumber) {
         return planeNumber + "_" + seatNumber;
     }
@@ -81,7 +101,15 @@ public class PlaneManager {
         System.out.println(plane);
         System.out.printf("Seats (%d total):\n", plane.getNumberOfSeats());
 
+        LocalDateTime now = LocalDateTime.now();
         plane.getSeats().forEach((seatNumber, seat) -> {
+            Booking booking = bookings.get(getBookingId(planeNumber, seatNumber));
+
+            boolean isBookedAndUnpaidExpired = seat.isBooked() && !seat.isPaid() && booking.isExpired();
+            if (isBookedAndUnpaidExpired) {
+                cancelSeatBooking(planeNumber, seatNumber);
+            }
+
             System.out.println(seatNumber + ". " + seat);
         });
         System.out.println();
@@ -100,7 +128,12 @@ public class PlaneManager {
             return;
         }
 
-        System.out.println("Booked by: " + booking.getBookedBy());
+        boolean isBookedAndUnpaidExpired = seat.isBooked() && !seat.isPaid() && booking.isExpired();
+        if (isBookedAndUnpaidExpired) {
+            cancelSeatBooking(planeNumber, seatNumber);
+        }
+
+        System.out.printf("Booked by %s at %s\n", booking.getBookedBy(), booking.getBookedAt());
         System.out.println(seat);
     }
 
